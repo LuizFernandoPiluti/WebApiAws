@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "WebApiAws.Consumidor": {
+      "commandName": "Project"
+    },
+    "Container (Dockerfile)": {
+      "commandName": "Docker"
+    }
+  }
+}
