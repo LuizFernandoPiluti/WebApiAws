@@ -1,4 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
+using WebApiAws.Api.Request;
+using WebApiAws.Servico.Interfaces;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -8,6 +11,12 @@ namespace WebApiAws.Api.Controllers
     [ApiController]
     public class AwsWebApiController : ControllerBase
     {
+        private readonly IAwsService _awsService;
+        public AwsWebApiController(IAwsService awsService)
+        {
+            _awsService = awsService;
+        }
+
         // GET: api/<AwsWebApiController>
         [HttpGet]
         public IEnumerable<string> Get()
@@ -24,8 +33,10 @@ namespace WebApiAws.Api.Controllers
 
         // POST api/<AwsWebApiController>
         [HttpPost]
-        public void Post([FromBody] string value)
+        public async Task<IActionResult> Post(MensagemRequest request)
         {
+            await _awsService.SendMessageAsync(request.Mensagem);
+            return Ok(request.Mensagem);
         }
 
         // PUT api/<AwsWebApiController>/5

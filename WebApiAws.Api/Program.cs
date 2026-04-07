@@ -1,4 +1,17 @@
+using WebApiAws.Dominio.Settings;
+using WebApiAws.Infra.Aws;
+using WebApiAws.Servico.Interfaces;
+using WebApiAws.Servico.servicos;
+
 var builder = WebApplication.CreateBuilder(args);
+
+
+builder.Services.Configure<Settings>(
+    builder.Configuration.GetSection("Settings"));
+
+
+builder.Services.AddScoped<IAwsService, AwsService>();
+builder.Services.AddScoped<IClientAwsService, ClientAwsService>();
 
 // Add services to the container.
 

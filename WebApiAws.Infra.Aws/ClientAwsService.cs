@@ -1,5 +1,5 @@
-﻿
-using Amazon;
+﻿using Amazon;
+using Amazon.Runtime;
 using Amazon.SQS;
 using Amazon.SQS.Model;
 
@@ -8,6 +8,13 @@ namespace WebApiAws.Infra.Aws
 
     public class ClientAwsService : IClientAwsService
     {
+        private readonly string _awsAccessKeyId;
+        private readonly string _awsSecretAccessKey;
+        public ClientAwsService()
+        {
+            _awsAccessKeyId = Environment.GetEnvironmentVariable("AWS_ACCESS_KEY_ID");
+            _awsSecretAccessKey = Environment.GetEnvironmentVariable("AWS_SECRET_ACCESS_KEY");
+        }
 
         public async Task<string> ReceiveMessageAsync(string UriSQS,string region)
         {
@@ -16,27 +23,28 @@ namespace WebApiAws.Infra.Aws
                 string msg = string.Empty;
                 var regionEndpoint = ResolveRegion(region);
 
-                var ClientAwsService = new AmazonSQSClient(regionEndpoint);
+                var credentials = new BasicAWSCredentials(_awsAccessKeyId, _awsSecretAccessKey);
+                var client = new AmazonSQSClient(credentials, regionEndpoint);
                 var request = new ReceiveMessageRequest
                 {
                     QueueUrl = UriSQS
                 };
 
             
-                var response = await ClientAwsService.ReceiveMessageAsync(request);
-                if (response != null)
+                var response = await client.ReceiveMessageAsync(request);
+                if (response.Messages != null)
                 {
                     foreach (var mensagem in response.Messages)
                     {
 
-                        await ClientAwsService.DeleteMessageAsync(UriSQS, mensagem.ReceiptHandle);
+                        await client.DeleteMessageAsync(UriSQS, mensagem.ReceiptHandle);
                         msg =  mensagem.Body;
 
                     }
                 }
                 else
                 {
-                    msg =  string.Empty;
+                    msg =  "Nenhuma mensagem a ser processada";
                 }
                 return msg;
            
@@ -56,7 +64,10 @@ namespace WebApiAws.Infra.Aws
             try
             {
                 var regionEndpoint = ResolveRegion(region);
-                var client = new AmazonSQSClient(regionEndpoint);
+     
+
+                var credentials = new BasicAWSCredentials(_awsAccessKeyId, _awsSecretAccessKey);
+                var client = new AmazonSQSClient(credentials,regionEndpoint);
                 var request = new SendMessageRequest
                 {
                     QueueUrl = UriSQS,
